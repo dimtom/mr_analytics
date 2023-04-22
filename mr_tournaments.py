@@ -32,8 +32,7 @@ def load_tournaments(data: CommonData, date_from, date_to, verbose=False):
     tournaments = {}
     for item in body_json['tournaments']:
         tournaments[item['id']] = item['name']
-    # print(tournaments)
 
-    if verbose:
-        print(f"Tournaments: {tournaments}")
+    # if verbose:
+    #    print(f"Tournaments: {tournaments}")
     return tournaments
