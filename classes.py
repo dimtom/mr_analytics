@@ -50,5 +50,16 @@ class Tournament:
 
 class Player:
     id: int
-    nickname: str
-    all_names: list[str]
+    name: str
+    all_names: list[str] = None
+
+    games: int = 0
+    tournaments: int = 0
+
+    def __init__(self, id: int):
+        self.id = id
+        self.name = None
+        self.all_names = []
+        self.games = 0
+        self.tournaments = 0
+    pass

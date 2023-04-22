@@ -141,7 +141,6 @@ class CommonData:
         return clubs
 
     def load_players(self):
-        # TODO: what to load?
-        pass
+        return dict[int, Player]()
 
     pass
