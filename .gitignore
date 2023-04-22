@@ -1,3 +1,6 @@
+# cache file for requests - do not check in
+.request_cache
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
