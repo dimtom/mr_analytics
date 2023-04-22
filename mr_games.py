@@ -1,15 +1,12 @@
-from mr_api import *
-import json
-from common_data import CommonData
+
 from classes import *
+from common_data import CommonData
+from mr_request import MrRequest
 
 
 def get_tournament_info(data, tournament_id: int):
-    url = f"{mr_url_api_get}/tournaments.php?&tournament_id={tournament_id}"
-    req = Request(url=url, headers=mr_headers)
-    with urlopen(req) as response:
-        body = response.read()
-        body_json = json.loads(body)
+    url = f"/tournaments.php?&tournament_id={tournament_id}"
+    body_json = MrRequest(data.cache).execute(url)
 
     # there MUST be one and only ONE tournament
     assert(body_json['count'] == 1)
@@ -19,6 +16,8 @@ def get_tournament_info(data, tournament_id: int):
     club_id = tournament_json['club_id']
     club_name = data.club_name(club_id)
     club_city = data.club_city(club_id)
+
+    # TODO: Return Tournament object!
     return {'id': tournament_id, 'name': tournament_name, 'club': club_name, 'city': club_city}
 
 
@@ -28,11 +27,8 @@ def load_tournament_games(data: CommonData, tournament_id: int):
         f"*** Tournament #{tournament_id}: {tournament_info['name']} ({tournament_info['club']}, {tournament_info['city']})")
 
     # Return all the games
-    url = f"{mr_url_api_get}/games.php?&tournament_id={tournament_id}"
-    req = Request(url=url, headers=mr_headers)
-    with urlopen(req) as response:
-        body = response.read()
-        body_json = json.loads(body)
+    url = f"/games.php?&tournament_id={tournament_id}"
+    body_json = MrRequest(data.cache).execute(url)
 
     num_games = body_json['count']
     print(f"Found games: {num_games}")

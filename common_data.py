@@ -1,7 +1,5 @@
 from classes import *
-
 from mr_request import *
-import json
 
 
 class CommonData:

@@ -1,6 +1,6 @@
-import json
-from mr_api import *
+
 from common_data import CommonData
+from mr_request import MrRequest
 
 
 def load_tournaments(data: CommonData, date_from, date_to, verbose=False):
@@ -10,12 +10,8 @@ def load_tournaments(data: CommonData, date_from, date_to, verbose=False):
     '''
 
     # url = f"{url_api_get}/tournaments.php?{league_aml}&started_after={date_from}&ended_before={date_to}&lod=1"
-    url = f"{mr_url_api_get}/tournaments.php?&started_after={date_from}&ended_before={date_to}&lod=1"
-
-    req = Request(url=url, headers=mr_headers)
-    with urlopen(req) as response:
-        body = response.read()
-        body_json = json.loads(body)
+    url = f"/tournaments.php?&started_after={date_from}&ended_before={date_to}&lod=1"
+    body_json = MrRequest(data.cache).execute(url)
 
     print(f"Found tournaments: {body_json['count']}")
     sorted_tournaments = sorted(
