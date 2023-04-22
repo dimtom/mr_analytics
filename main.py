@@ -3,18 +3,24 @@ import common_data
 import mr_tournaments
 import mr_games
 
+from request_cache import RequestCache
+
 
 def main():
-    data = common_data.CommonData()
+    cache = RequestCache()
+    cache.load()
+
+    data = common_data.CommonData(cache)
     data.load()
 
-    seasons = {
+    '''seasons = {
         2017: ["2017-01-01", "2020-01-01"],
         2020: ["2020-01-01", "2021-01-01"],
         2021: ["2021-01-01", "2022-01-01"],
         2022: ["2022-01-01", "2023-01-01"],
         2023: ["2023-01-01", "now"],
     }
+    '''
 
     # uncomment it
     '''
@@ -34,10 +40,13 @@ def main():
     '''
 
     # just try to load games of VaWaCa
-    tournament_id = 11
+    '''tournament_id = 11
     games = mr_games.load_tournament_games(data, tournament_id)
 
     # TODO: save tournaments to disk
+    '''
+
+    cache.save()
     pass
 
 

@@ -1,11 +1,14 @@
 from classes import *
 
-from mr_api import *
+from mr_request import *
 import json
 
 
 class CommonData:
-    def __init__(self):
+    cache: RequestCache = None
+
+    def __init__(self, cache: RequestCache):
+        self.cache = cache
         self.countries: dict[int, Country] = None
         self.cities: dict[int, City] = None
         self.clubs: dict[int, Club] = None
@@ -36,12 +39,7 @@ class CommonData:
         '''
 
         print("Loading countries...")
-
-        url = f"{mr_url_api_get}/countries.php"
-        req = Request(url=url, headers=mr_headers)
-        with urlopen(req) as response:
-            body = response.read()
-            body_json = json.loads(body)
+        body_json = MrRequest(self.cache).execute("/countries.php")
 
         if verbose:
             print(f"Loaded countries: {body_json['count']}")
@@ -52,7 +50,7 @@ class CommonData:
             countries[item['id']] = Country(item['id'], item['country'])
         return countries
 
-    def load_cities(verbose=False) -> dict[int, City]:
+    def load_cities(self, verbose=False) -> dict[int, City]:
         '''
         Loading cities: ONLY from Canada (country=1) and USA (country=4)
         https://mafiaratings.com/api/get/cities.php?help
@@ -64,11 +62,8 @@ class CommonData:
         country_ids = [mr_country_canada, mr_country_usa]
         body_all_cities = []
         for country_id in country_ids:
-            url = f"{mr_url_api_get}/cities.php?country={country_id}&page_size={big_number}"
-            req = Request(url=url, headers=mr_headers)
-            with urlopen(req) as response:
-                body = response.read()
-                body_json = json.loads(body)
+            body_json = MrRequest(self.cache).execute(
+                f"/cities.php?country={country_id}&page_size={big_number}")
 
             print(
                 f"Country id: {country_id}. Loaded cities: {body_json['count']} - in current page {len(body_json['cities'])}")
@@ -97,11 +92,8 @@ class CommonData:
         ids = [mr_country_canada, mr_country_usa]
         clubs_json = []
         for country_id in ids:
-            url = f"{mr_url_api_get}/clubs.php?country_id={country_id}"
-            req = Request(url=url, headers=mr_headers)
-            with urlopen(req) as response:
-                body = response.read()
-                body_json = json.loads(body)
+            url = f"/clubs.php?country_id={country_id}"
+            body_json = MrRequest(self.cache).execute(url)
 
             country_name = self.country_name(country_id)
             club_count = body_json['count']
