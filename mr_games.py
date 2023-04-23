@@ -46,40 +46,89 @@ def process_tournament_games(data: CommonData, tournament: Tournament, games_jso
                           key=lambda item: item['endTime'])
 
     for game_json in sorted_games:
-        game_players = []
-
-        game_id = game_json['id']
-        winner = game_json['winner']
-        moderator_id = game_json['moderator']['id']
-        players_json = game_json['players']
-
+        # do not include non-rating games!
         game_is_rating = game_json['rating'] if 'rating' in game_json else True
         if not game_is_rating:
             print(f"Skipping non-rating game: {game_id}")
             continue
 
-        for item in players_json:
+        game_id = game_json['id']
+        moderator_id = game_json['moderator']['id']
+        game_result = game_json['winner']
+        players_json = game_json['players']
+
+        game = Game(tournament, game_id, moderator_id, game_result)
+
+        game_slots = []
+        for pos, item in enumerate(players_json):
             player_id = item['id']
             player_name = item['name']
-            slot = Player(int(player_id), player_name)
-            game_players.append(slot)
+
+            slot_bonus = 0.0
+            if 'bonus' in item:
+                if item['bonus'] == "worstMove":
+                    slot_bonus = -0.3
+                else:
+                    slot_bonus = float(item['bonus'])
+            slot_role = item['role'] if 'role' in item else "civ"
+
+            legacy = None
+            if 'legacy' in item:
+                legacy = item['legacy']
+
+            eliminated = None
+            if 'death' in item:
+                death_type = item['death']['type']
+                if death_type == "kickOut" or death_type == "teamKickOut":
+                    eliminated = death_type
+
+            slot = Slot(game, pos+1, int(player_id), player_name)
+            slot.role = slot_role
+            slot.bonus_score = slot_bonus
+            slot.legacy = legacy
+            slot.eliminated = eliminated
+            game_slots.append(slot)
 
         # update tournament players from this game players
-        for slot in game_players:
-            if slot.id not in tournament_players:
-                tournament_players[slot.id] = Player(slot.id, slot.name)
-            tournament_players[slot.id].add_name(slot.name)
-
-        game = Game(game_id, tournament)
-        game.winner = winner
+        for slot in game_slots:
+            id = slot.player_id
+            name = slot.player_name
+            if id not in tournament_players:
+                tournament_players[id] = Player(id, name)
+            tournament_players[id].add_name(name)
 
         # here we need to find players in Tournament (to keep allnames)
-        game.players = [tournament_players[player.id]
-                        for player in game_players]
+        game.slots = game_slots
         game.game_json = game_json
         games.append(game)
 
+        # calc scores after all slots are added (required for legacy)
+        for slot in game.slots:
+            slot.calcMainScore()
+            slot.calcLegacyScore()
+            slot.calcPenaltyScore()
+            slot.calcTotalScore()
+
     return games, tournament_players
+
+
+def calc_tournament_scores(data: CommonData, tournament: Tournament):
+
+    for player in tournament.players.values():
+        player.main_score = 0.0
+        player.bonus_score = 0.0
+        player.legacy_score = 0.0
+        player.penalty_score = 0.0
+        player.total_score = 0.0
+
+    for game in tournament.games:
+        for slot in game.slots:
+            player = tournament.players[slot.player_id]
+            player.main_score += slot.main_score
+            player.bonus_score += slot.bonus_score
+            player.legacy_score += slot.legacy_score
+            player.penalty_score += slot.penalty_score
+            player.total_score += slot.total_score
 
 
 '''def process_game(data: CommonData, game: Game, game_json: str):

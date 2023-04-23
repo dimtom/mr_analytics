@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 
 class Country:
     id: int
@@ -68,18 +70,110 @@ class Tournament:
         return self.name
 
 
+class Slot:
+    pass
+
+
 class Game:
-    id: int
     tournament: Tournament
+    id: int
+    moderator_id: int
+    result: str
+    slots: list[Slot]
 
-    players: list[Player]
-
-    def __init__(self, id: int, tournament: Tournament):
-        self.id = id
+    def __init__(self, tournament: Tournament, id: int, moderator_id: int, winner: str):
         self.tournament = tournament
+        self.id = id
+        self.moderator_id = moderator_id
+        self.result = "red" if winner == "civ" else "black"
+        print(f"Init game: {self.id} result: {self.result}")
+
+    def check_slots_valid(self, slots: list[Slot]):
+        for s in slots:
+            assert(s.game == self)
+
+        role_count = defaultdict(int)
+        for s in slots:
+            role_count[s.role] += 1
+        assert(role_count['civ'] == 6)
+        assert(role_count['sheriff'] == 1)
+        assert(role_count['maf'] == 2)
+        assert(role_count['don'] == 1)
+
+    def set_slots(self, slots: list[Slot]):
+        assert(len(slots) == 10)
+
+        self.check_slots_valid(slots)
+        self.slots = slots
 
     def __str__(self):
         return f"game #{self.id:04d}"
+
+
+class Slot:
+    '''
+    Slot represents player in current game sitting at specific position (1-10)
+    with specific role and specific outcome
+    '''
+    game: Game
+    position: int
+    player_id: int
+    player_name: str
+
+    legacy: list[int] = None
+    legacy_score: float
+
+    eliminated: str = None
+
+    role: str  # civ, maf, don, sheriff
+    main_score: float  # main score (win or loose)
+    bonus_score: float  # additional score (by moderator)
+    penalty_score: float  # penalty for kick-out (team kick-out)
+    total_score: float  # main total number of score for player per game
+
+    def __init__(self, game: Game, position: int, player_id: int, player_name: str):
+        self.game = game
+        self.position = position
+        assert(self.position >= 1 and self.position <= 10)
+
+        self.player_id = player_id
+        self.player_name = player_name
+
+    def calcMainScore(self):
+        slot_red = self.role == "civ" or self.role == "sheriff"
+        game_red = (self.game.result == "red")
+        self.main_score = 1.0 if (slot_red and game_red) or (
+            not slot_red and not game_red) else 0.0
+
+    def calcLegacyScore(self):
+        legacy_count = 0
+        if self.legacy:
+            for pos in self.legacy:
+                idx = pos - 1
+                role = self.game.slots[idx].role
+                if role == "maf" or role == "done":
+                    legacy_count += 1
+
+        self.legacy_score = 0.0
+        if legacy_count == 2:
+            self.legacy_score = 0.3
+        elif legacy_count == 3:
+            self.legacy_score = 0.5
+
+    def calcPenaltyScore(self):
+        self.penalty_score = 0.0
+        if self.eliminated:
+            if self.eliminated == "kickOut":
+                self.penalty_score = -0.5
+            elif self.eliminated == "teamKickOut":
+                self.penalty_score = -0.7
+
+    def calcTotalScore(self):
+        self.total_score = self.main_score + self.bonus_score + \
+            self.penalty_score + self.legacy_score
+        self.total_score += 0.3
+
+    pass
 
 
 class Player:
