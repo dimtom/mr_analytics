@@ -4,6 +4,8 @@ import mr_games
 
 from request_cache import RequestCache
 
+import one_tournament
+
 
 def main():
     cache = RequestCache()
@@ -12,7 +14,7 @@ def main():
     data = common_data.CommonData(cache)
     data.load()
 
-    seasons = {
+    '''seasons = {
         2017: ["2017-01-01", "2020-01-01"],
         2020: ["2020-01-01", "2021-01-01"],
         2021: ["2021-01-01", "2022-01-01"],
@@ -28,6 +30,7 @@ def main():
         t = mr_tournaments.load_tournaments(
             data, date_from, date_to, verbose=True)
         tournaments[year] = t
+    '''
 
     '''
     for year, ids in tournaments.items():
@@ -37,8 +40,10 @@ def main():
     '''
 
     # just try to load games of VaWaCa
-    tournament_id = 11
-    games = mr_games.load_tournament_games(data, tournament_id)
+    # tournament_id = 11
+    # games = mr_games.load_tournament_games(data, tournament_id)
+
+    one_tournament.analyze_goldengate_2023(data)
 
     # TODO: save tournaments to disk
 
