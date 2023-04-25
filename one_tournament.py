@@ -4,6 +4,7 @@ from request_cache import RequestCache
 
 import mr_tournament
 import mr_games
+import output
 import json
 
 
@@ -48,40 +49,9 @@ def analyze_goldengate_2023(data: CommonData):
     # calculate scores for every player
     mr_games.calc_tournament_scores(data, tournament)
 
-    print("Games of tournament:")
-    print(f"*** Total number of games: {len(tournament_games)}")
-    for game in tournament_games:
-        print(f"\n* Game {game.id}. Result: {game.result}")
-        for slot in game.slots:
-            blank_str = "    "
+    output.output_games(tournament_games, tournament_players)
 
-            total_score_str = f"{slot.total_score: 4.2f}"
-            main_score_str = f"{int(slot.main_score): 1d}" if slot.main_score != 0.0 else "  "
-            legacy_score_str = f"{slot.legacy_score: 4.2f}" if slot.legacy_score != 0.0 else blank_str
-            auto_score_str = "  " if slot.auto_score == 0.3 else "--"
-            bonus_score_str = f"{slot.bonus_score: 4.2f}" if slot.bonus_score != 0.0 else blank_str
-            penalty_score_str = f"{slot.penalty_score:4.2f}" if slot.penalty_score != 0.0 else blank_str
-
-            print(
-                f"({slot.short_role()}) {slot.player_name[:10]:10s}: {total_score_str} {main_score_str} {legacy_score_str} {auto_score_str} {bonus_score_str} {penalty_score_str}")
-
-        # print info on first-kill
-        for slot in game.slots:
-            if not slot.first_killed:
-                continue
-            fk_name = tournament.players[slot.player_id].name
-            print(
-                f"FK: {fk_name}. Legacy: {slot.legacy}. Score: {slot.legacy_score}. Ci: {slot.ci_score: 4.2f}")
-
-    print(f"\n***Total number of players: {len(tournament_players)}")
-    sorted_players = sorted(tournament.players.values(),
-                            key=lambda player: player.total_score, reverse=True)
-
-    print("Players of tournament:")
-    for player in sorted_players:
-        total_score_str = f"{player.total_score: 4.2f}"
-        main_score_str = f"{int(player.main_score): 2d}"
-        print(f"{player.name:20s} {total_score_str} {main_score_str} {player.legacy_score:4.2f} {player.bonus_score:4.2f} {player.penalty_score:4.2f} {player.ci_score:4.2f}")
+    output.output_players(tournament_players)
 
     '''
     with open('gg_players.txt', 'w') as f:
