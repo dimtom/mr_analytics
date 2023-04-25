@@ -70,6 +70,17 @@ class Tournament:
         return self.name
 
 
+class Event:
+    id: int
+    weight: float
+    is_final: bool
+
+    def __init__(self, id: int, weight: int, is_final: bool):
+        self.id = id
+        self.weight = weight
+        self.is_final = is_final
+
+
 class Slot:
     pass
 
@@ -86,7 +97,8 @@ class Game:
         self.id = id
         self.moderator_id = moderator_id
         self.result = "red" if winner == "civ" else "black"
-        print(f"Init game: {self.id} result: {self.result}")
+        # for debug
+        # print(f"Init game: {self.id} result: {self.result}")
 
     def check_slots_valid(self, slots: list[Slot]):
         for s in slots:
@@ -127,6 +139,7 @@ class Slot:
 
     role: str  # civ, maf, don, sheriff
     main_score: float  # main score (win or loose)
+    auto_score: float
     bonus_score: float  # additional score (by moderator)
     penalty_score: float  # penalty for kick-out (team kick-out)
     total_score: float  # main total number of score for player per game
@@ -139,6 +152,20 @@ class Slot:
         self.player_id = player_id
         self.player_name = player_name
 
+    def short_role(self):
+        if self.role == "civ":
+            return " "
+        elif self.role == "maf":
+            return "M"
+        elif self.role == "don":
+            return "D"
+        elif self.role == "sheriff":
+            return "S"
+        else:
+            # for debug
+            # print(f"### Unknown role: {self.role}")
+            return None
+
     def calcMainScore(self):
         slot_red = self.role == "civ" or self.role == "sheriff"
         game_red = (self.game.result == "red")
@@ -146,32 +173,44 @@ class Slot:
             not slot_red and not game_red) else 0.0
 
     def calcLegacyScore(self):
-        legacy_count = 0
+        self.legacy_score = 0.0
+
         if self.legacy:
+            legacy_count = 0
             for pos in self.legacy:
                 idx = pos - 1
                 role = self.game.slots[idx].role
-                if role == "maf" or role == "done":
+                if role == "maf" or role == "don":
                     legacy_count += 1
 
-        self.legacy_score = 0.0
-        if legacy_count == 2:
-            self.legacy_score = 0.3
-        elif legacy_count == 3:
-            self.legacy_score = 0.5
+            if legacy_count == 2:
+                self.legacy_score = 0.3
+            elif legacy_count == 3:
+                self.legacy_score = 0.5
+            print(
+                f"Slot: {self.position}. Legacy: {self.legacy}. Score: {self.legacy_score}")
 
     def calcPenaltyScore(self):
         self.penalty_score = 0.0
         if self.eliminated:
             if self.eliminated == "kickOut":
                 self.penalty_score = -0.5
+            elif self.eliminated == "warnings":
+                self.penalty_score = -0.5
             elif self.eliminated == "teamKickOut":
                 self.penalty_score = -0.7
+            else:
+                print("### Unknown eliminated: {self.eliminated}")
 
     def calcTotalScore(self):
-        self.total_score = self.main_score + self.bonus_score + \
-            self.penalty_score + self.legacy_score
-        self.total_score += 0.3
+        self.calcMainScore()
+        self.calcLegacyScore()
+        self.calcPenaltyScore()
+        self.total_score = (self.main_score +
+                            self.legacy_score +
+                            self.auto_score +
+                            self.bonus_score +
+                            self.penalty_score)
 
     pass
 

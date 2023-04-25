@@ -1,3 +1,4 @@
+from classes import *
 
 from common_data import CommonData
 from mr_request import MrRequest

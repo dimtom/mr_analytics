@@ -4,30 +4,10 @@ from common_data import CommonData
 from mr_request import MrRequest
 
 
-def get_tournament_info(data, tournament_id: int):
-    url = f"/tournaments.php?&tournament_id={tournament_id}"
-    body_json = MrRequest(data.cache).execute(url)
-
-    # there MUST be one and only ONE tournament
-    assert(body_json['count'] == 1)
-    tournament_json = body_json['tournaments'][0]
-
-    tournament_name = tournament_json['name']
-    club_id = tournament_json['club_id']
-    club = data.clubs[club_id] if club_id in data.clubs else None
-    city = club.city if club else None
-
-    return Tournament(id=tournament_id, name=tournament_name, club=club, city=city)
-
-
-def load_tournament_games(data: CommonData, tournament_id: int):
-    tournament = get_tournament_info(data, tournament_id)
-    print(
-        f"*** Tournament #{tournament.id}: {tournament.name} ({tournament.club}, {tournament.city})")
-
+def load_tournament_games(data: CommonData, tournament_id: int, event_id: int):
     # Return all the games
     page_size = 1000  # big number to fit ALL the games of current tournament
-    url = f"/games.php?&tournament_id={tournament_id}&page_size={page_size}"
+    url = f"/games.php?&tournament_id={tournament_id}&event_id={event_id}&page_size={page_size}"
     body_json = MrRequest(data.cache).execute(url)
 
     num_games = body_json['count']
@@ -61,13 +41,25 @@ def process_tournament_games(data: CommonData, tournament: Tournament, games_jso
 
         game_slots = []
         for pos, item in enumerate(players_json):
-            player_id = item['id']
-            player_name = item['name']
+            # Sometimes game does not have player id
+            # This is not a valid game,
+            # moderator missed a player...
+            if 'id' not in item:
+                print(f"### Game: {game_id} slot: {pos+1} - no player_id!")
+                player_id = 0
+                player_name = "###"
+            else:
+                player_id = item['id']
+                player_name = item['name']
 
+            # TODO: move value 0.3 into Slot or score calculation
+            # Just add bool flag "worst move" to the slot
+            # sothat all magic numbers are in one place
+            slot_auto = 0.3
             slot_bonus = 0.0
             if 'bonus' in item:
                 if item['bonus'] == "worstMove":
-                    slot_bonus = -0.3
+                    slot_auto = 0.0
                 else:
                     slot_bonus = float(item['bonus'])
             slot_role = item['role'] if 'role' in item else "civ"
@@ -79,11 +71,12 @@ def process_tournament_games(data: CommonData, tournament: Tournament, games_jso
             eliminated = None
             if 'death' in item:
                 death_type = item['death']['type']
-                if death_type == "kickOut" or death_type == "teamKickOut":
+                if death_type != "night" and death_type != "day":
                     eliminated = death_type
 
             slot = Slot(game, pos+1, int(player_id), player_name)
             slot.role = slot_role
+            slot.auto_score = slot_auto
             slot.bonus_score = slot_bonus
             slot.legacy = legacy
             slot.eliminated = eliminated
@@ -102,17 +95,17 @@ def process_tournament_games(data: CommonData, tournament: Tournament, games_jso
         game.game_json = game_json
         games.append(game)
 
-        # calc scores after all slots are added (required for legacy)
-        for slot in game.slots:
-            slot.calcMainScore()
-            slot.calcLegacyScore()
-            slot.calcPenaltyScore()
-            slot.calcTotalScore()
-
     return games, tournament_players
 
 
 def calc_tournament_scores(data: CommonData, tournament: Tournament):
+    print("Calculating scores")
+
+    # calc scores after all slots are added (required for legacy)
+    for game in tournament.games:
+        print(f"Game: {game.id}")
+        for slot in game.slots:
+            slot.calcTotalScore()
 
     for player in tournament.players.values():
         player.main_score = 0.0
@@ -124,11 +117,12 @@ def calc_tournament_scores(data: CommonData, tournament: Tournament):
     for game in tournament.games:
         for slot in game.slots:
             player = tournament.players[slot.player_id]
-            player.main_score += slot.main_score
-            player.bonus_score += slot.bonus_score
-            player.legacy_score += slot.legacy_score
-            player.penalty_score += slot.penalty_score
             player.total_score += slot.total_score
+            player.main_score += slot.main_score
+
+            player.legacy_score += slot.legacy_score
+            player.bonus_score += slot.auto_score + slot.bonus_score
+            player.penalty_score += slot.penalty_score
 
 
 '''def process_game(data: CommonData, game: Game, game_json: str):
