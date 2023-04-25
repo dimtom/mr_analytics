@@ -47,6 +47,7 @@ def calcSlotScores(self: Slot, weight: float):
     # sothat we can easy copy/merge/update scores
     self.main_score *= weight
     self.ci_score *= weight
+    self.legacy_score *= weight
     self.auto_score *= weight
     self.bonus_score *= weight
     self.penalty_score *= weight
@@ -79,9 +80,6 @@ def calc_event_scores(event: Event, weight: float):
 
     # Magic value: 0.4 (fiim rules)
     fiim_first_night_score = 0.4
-
-    # TODO: TEMP WORKAROUND
-    event.distance = 12  # TODO: calculate for every tournament!
 
     print("Calculating Ci for every player...")
     fiim_coeff_b = round(fiim_first_night_score * event.distance)

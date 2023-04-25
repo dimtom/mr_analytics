@@ -39,14 +39,16 @@ def analyze_tournament(data: CommonData, tournament_id: int):
         stage.games = stage_games
         stage.players = stage_players
 
+        stage.distance = calculate_stage_distance(stage)
+
         # calculate scores for every player
         weight = stage.weight
         score.calc_event_scores(stage, weight)
 
-        # output.output_games(stage_games, stage_players)
+        output.output_games(stage.games, stage.players)
 
         # print(stage_players)
-        output.output_players(stage_players)
+        output.output_players(stage.players)
 
     # TODO: merge players of stages
     # Technically, it is not good to have MANY sets of players as game points to Stage-Player with not final scores

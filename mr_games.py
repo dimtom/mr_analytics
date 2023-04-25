@@ -49,7 +49,7 @@ def process_tournament_games(data: CommonData, tournament: Tournament, games_jso
                 player_id = 0
                 player_name = "###"
             else:
-                player_id = item['id']
+                player_id = int(item['id'])
                 player_name = item['name']
 
             # TODO: move value 0.3 into Slot or score calculation
@@ -82,7 +82,7 @@ def process_tournament_games(data: CommonData, tournament: Tournament, games_jso
                 if death_type != "night" and death_type != "day":
                     eliminated = death_type
 
-            slot = Slot(game, pos+1, int(player_id), player_name)
+            slot = Slot(game, pos+1, player_id, player_name)
             slot.role = slot_role
             slot.auto_score = slot_auto
             slot.bonus_score = slot_bonus

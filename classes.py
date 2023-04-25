@@ -158,6 +158,7 @@ class Slot:
         self.main_score = 0.0
         self.ci_score = 0.0
 
+        self.legacy_score = 0.0
         self.auto_score = 0.0
         self.bonus_score = 0.0
         self.penalty_score = 0.0
@@ -177,52 +178,6 @@ class Slot:
             # print(f"### Unknown role: {self.role}")
             return None
 
-    def calcMainScore(self):
-        slot_red = self.role == "civ" or self.role == "sheriff"
-        game_red = (self.game.result == "red")
-        self.main_score = 1.0 if (slot_red and game_red) or (
-            not slot_red and not game_red) else 0.0
-
-    def calcLegacyScore(self):
-        self.legacy_score = 0.0
-
-        if self.legacy:
-            legacy_count = 0
-            for pos in self.legacy:
-                idx = pos - 1
-                role = self.game.slots[idx].role
-                if role == "maf" or role == "don":
-                    legacy_count += 1
-
-            if legacy_count == 2:
-                self.legacy_score = 0.3
-            elif legacy_count == 3:
-                self.legacy_score = 0.5
-
-    def calcPenaltyScore(self):
-        self.penalty_score = 0.0
-        if self.eliminated:
-            if self.eliminated == "kickOut":
-                self.penalty_score = -0.5
-            elif self.eliminated == "warnings":
-                self.penalty_score = -0.5
-            elif self.eliminated == "teamKickOut":
-                self.penalty_score = -0.7
-            else:
-                print("### Unknown eliminated: {self.eliminated}")
-
-    def calcTotalScore(self):
-        self.calcMainScore()
-        self.calcLegacyScore()
-        self.calcPenaltyScore()
-        self.total_score = (self.main_score + self.ci_score +
-                            self.legacy_score +
-                            self.auto_score +
-                            self.bonus_score +
-                            self.penalty_score)
-
-    pass
-
 
 class Player:
     id: int
@@ -231,6 +186,16 @@ class Player:
 
     games: int = 0
     tournaments: int = 0
+
+    # Refactor into Score class
+    # both for Player and Slot
+    total_score: float = 0.0
+    main_score: float = 0.0
+    ci_score: float = 0.0
+    legacy_score: float = 0.0
+    auto_score: float = 0.0
+    bonus_score: float = 0.0
+    penalty_score: float = 0.0
 
     # TODO: refactor and put Score class inside player
 

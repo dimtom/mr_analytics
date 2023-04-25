@@ -11,12 +11,12 @@ def output_games(games, players):
 def output_game_score(game: Game, players: dict[int, Player]):
     print(f"\n* Game {game.id}. Result: {game.result}")
     for slot in game.slots:
-        blank_str = "     "
+        blank_str = "      "
 
         total_score_str = f"{slot.total_score: 6.2f}"
-        main_score_str = f"{int(slot.main_score): 2d}" if slot.main_score != 0.0 else "  "
+        main_score_str = f"{slot.main_score: 6.2f}" if slot.main_score != 0.0 else blank_str
         legacy_score_str = f"{slot.legacy_score: 6.2f}" if slot.legacy_score != 0.0 else blank_str
-        auto_score_str = " - " if slot.auto_score == 0.3 else " X "
+        auto_score_str = " X " if slot.auto_score == 0.0 else " - "
         bonus_score_str = f"{slot.bonus_score: 6.2f}" if slot.bonus_score != 0.0 else blank_str
         penalty_score_str = f"{slot.penalty_score:6.2f}" if slot.penalty_score != 0.0 else blank_str
 
@@ -40,5 +40,5 @@ def output_players(players):
     print("Players of tournament:")
     for player in sorted_players:
         total_score_str = f"{player.total_score: 6.2f}"
-        main_score_str = f"{int(player.main_score): 6.2f}"
+        main_score_str = f"{player.main_score: 6.2f}"
         print(f"{player.name[:16]:16s} {total_score_str} {main_score_str} {player.legacy_score:6.2f} {player.bonus_score:6.2f} {player.penalty_score:6.2f} {player.ci_score:6.2f}")
