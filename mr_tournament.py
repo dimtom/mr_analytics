@@ -34,6 +34,7 @@ def get_tournament_events(data, tournament_id: int):
     for event_json in events_json:
         id = event_json['id']
 
+        is_main = False
         is_final = False
         weight = 1.0
         if 'scoring_options' in event_json:
@@ -43,7 +44,8 @@ def get_tournament_events(data, tournament_id: int):
                 weight = options_json['weight']
             if 'group' in options_json:
                 is_final = options_json['group'] == "final"
+                is_main = options_json['group'] == "main"
 
-        event = Event(id, weight, is_final)
+        event = Event(id, weight, is_main, is_final)
         events.append(event)
     return events

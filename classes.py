@@ -73,12 +73,14 @@ class Tournament:
 class Event:
     id: int
     weight: float
+    is_main: bool
     is_final: bool
 
-    def __init__(self, id: int, weight: int, is_final: bool):
+    def __init__(self, id: int, weight: int, is_main: bool, is_final: bool):
         self.id = id
         self.weight = weight
         self.is_final = is_final
+        self.is_main = is_main
 
 
 class Slot:
