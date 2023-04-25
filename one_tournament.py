@@ -73,7 +73,7 @@ def analyze_goldengate_2023(data: CommonData):
     for player in sorted_players:
         total_score_str = f"{player.total_score: 4.2f}"
         main_score_str = f"{int(player.main_score): 2d}"
-        print(f"{player.name:20s} {total_score_str} {main_score_str} {player.legacy_score:4.2f} {player.bonus_score:4.2f} {player.penalty_score:4.2f} ")
+        print(f"{player.name:20s} {total_score_str} {main_score_str} {player.legacy_score:4.2f} {player.bonus_score:4.2f} {player.penalty_score:4.2f} {player.ci_score:4.2f}")
 
     '''
     with open('gg_players.txt', 'w') as f:

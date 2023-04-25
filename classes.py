@@ -134,13 +134,16 @@ class Slot:
     player_id: int
     player_name: str
 
+    first_killed: bool
+    eliminated: str = None
+
     legacy: list[int] = None
     legacy_score: float
 
-    eliminated: str = None
-
     role: str  # civ, maf, don, sheriff
     main_score: float  # main score (win or loose)
+    ci_score: float
+
     auto_score: float
     bonus_score: float  # additional score (by moderator)
     penalty_score: float  # penalty for kick-out (team kick-out)
@@ -153,6 +156,14 @@ class Slot:
 
         self.player_id = player_id
         self.player_name = player_name
+
+        self.main_score = 0.0
+        self.ci_score = 0.0
+
+        self.auto_score = 0.0
+        self.bonus_score = 0.0
+        self.penalty_score = 0.0
+        self.total_score = 0.0
 
     def short_role(self):
         if self.role == "civ":
@@ -189,8 +200,6 @@ class Slot:
                 self.legacy_score = 0.3
             elif legacy_count == 3:
                 self.legacy_score = 0.5
-            print(
-                f"Slot: {self.position}. Legacy: {self.legacy}. Score: {self.legacy_score}")
 
     def calcPenaltyScore(self):
         self.penalty_score = 0.0
@@ -208,7 +217,7 @@ class Slot:
         self.calcMainScore()
         self.calcLegacyScore()
         self.calcPenaltyScore()
-        self.total_score = (self.main_score +
+        self.total_score = (self.main_score + self.ci_score +
                             self.legacy_score +
                             self.auto_score +
                             self.bonus_score +
