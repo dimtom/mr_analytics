@@ -43,7 +43,9 @@ def main():
     # tournament_id = 11
     # games = mr_games.load_tournament_games(data, tournament_id)
 
-    one_tournament.analyze_goldengate_2023(data)
+    # Analyze GoldenGate-2023
+    tournament_id = 116
+    one_tournament.analyze_tournament(data, tournament_id)
 
     # TODO: save tournaments to disk
 

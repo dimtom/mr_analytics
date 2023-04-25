@@ -73,14 +73,12 @@ class Tournament:
 class Event:
     id: int
     weight: float
-    is_main: bool
-    is_final: bool
+    is_final_stage: bool
 
-    def __init__(self, id: int, weight: int, is_main: bool, is_final: bool):
+    def __init__(self, id: int, weight: float, is_final: bool):
         self.id = id
         self.weight = weight
-        self.is_final = is_final
-        self.is_main = is_main
+        self.is_final_stage = is_final
 
 
 class Slot:
@@ -138,12 +136,12 @@ class Slot:
     eliminated: str = None
 
     legacy: list[int] = None
-    legacy_score: float
-
     role: str  # civ, maf, don, sheriff
+
+    # TODO: refactor and put Score class inside player
     main_score: float  # main score (win or loose)
     ci_score: float
-
+    legacy_score: float
     auto_score: float
     bonus_score: float  # additional score (by moderator)
     penalty_score: float  # penalty for kick-out (team kick-out)
@@ -233,6 +231,8 @@ class Player:
 
     games: int = 0
     tournaments: int = 0
+
+    # TODO: refactor and put Score class inside player
 
     def __init__(self, id: int, name: str):
         self.id = id

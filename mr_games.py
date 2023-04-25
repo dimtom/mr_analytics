@@ -108,77 +108,12 @@ def process_tournament_games(data: CommonData, tournament: Tournament, games_jso
 
 
 def calc_tournament_scores(data: CommonData, tournament: Tournament):
-    print("\n*** Calculating scores")
+    pass
 
-    # calc c(i)
-    player_games_first_killed = defaultdict(set)
-    player_games_first_killed_and_lost = defaultdict(set)
-    for game in tournament.games:
-        for slot in game.slots:
-            if slot.first_killed and (slot.role == "civ" or slot.role == "sheriff"):
-                player_games_first_killed[slot.player_id].add(game.id)
 
-                if game.result == "black":
-                    player_games_first_killed_and_lost[slot.player_id].add(
-                        game.id)
-
-    # Magic value: 0.4 (fiim rules)
-    fiim_first_night_score = 0.4
-
-    # TODO: TEMP WORKAROUND
-    tournament.distance = 12  # TODO: calculate for every tournament!
-
-    print("Calculating Ci for every player...")
-    fiim_coeff_b = round(fiim_first_night_score * tournament.distance)
-    for player in tournament.players.values():
-        player.ci_score = 0.0
-
-        games_first_killed = player_games_first_killed[player.id]
-        games_first_killed_and_lost = player_games_first_killed_and_lost[player.id]
-        num_games_first_killed = len(games_first_killed)
-        num_games_first_killed_and_lost = len(games_first_killed_and_lost)
-        if num_games_first_killed_and_lost == 0:
-            continue
-
-        # points =  * fiim_first_night_score
-        ci_score = num_games_first_killed * fiim_first_night_score / fiim_coeff_b
-        if ci_score < 0.0:
-            ci_score = 0.0
-        if ci_score > fiim_first_night_score:
-            ci_score = fiim_first_night_score
-
-        for game in tournament.games:
-            if game.id in games_first_killed_and_lost:
-                for slot in game.slots:
-                    if slot.player_id == player.id:
-                        slot.ci_score = ci_score
-
-    # calc slots total scores
-    print("Calculating slots scores...")
-    for game in tournament.games:
-        for slot in game.slots:
-            slot.calcTotalScore()
-
-    print("Calculating players scores...")
-    for player in tournament.players.values():
-        player.total_score = 0.0
-        player.main_score = 0.0
-
-        player.legacy_score = 0.0
-        player.bonus_score = 0.0
-        player.penalty_score = 0.0
-        player.ci_score = 0.0
-
-    for game in tournament.games:
-        for slot in game.slots:
-            player = tournament.players[slot.player_id]
-            player.total_score += slot.total_score
-            player.main_score += slot.main_score
-
-            player.legacy_score += slot.legacy_score
-            player.bonus_score += slot.auto_score + slot.bonus_score
-            player.penalty_score += slot.penalty_score
-            player.ci_score += slot.ci_score
+def calc_stage_scores(data: CommonData, tournament: Tournament, event: Event):
+    # TODO
+    pass
 
 
 '''def process_game(data: CommonData, game: Game, game_json: str):
