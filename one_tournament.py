@@ -65,6 +65,14 @@ def analyze_goldengate_2023(data: CommonData):
             print(
                 f"({slot.short_role()}) {slot.player_name[:10]:10s}: {total_score_str} {main_score_str} {legacy_score_str} {auto_score_str} {bonus_score_str} {penalty_score_str}")
 
+        # print info on first-kill
+        for slot in game.slots:
+            if not slot.first_killed:
+                continue
+            fk_name = tournament.players[slot.player_id].name
+            print(
+                f"FK: {fk_name}. Legacy: {slot.legacy}. Score: {slot.legacy_score}. Ci: {slot.ci_score: 4.2f}")
+
     print(f"\n***Total number of players: {len(tournament_players)}")
     sorted_players = sorted(tournament.players.values(),
                             key=lambda player: player.total_score, reverse=True)
