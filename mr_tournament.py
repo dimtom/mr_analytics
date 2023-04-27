@@ -3,7 +3,7 @@ from mr_request import MrRequest
 from common_data import CommonData
 
 
-def get_tournament_info(data, tournament_id: int):
+def get_tournament_info(data: CommonData, tournament_id: int):
     url = f"/tournaments.php?tournament_id={tournament_id}"
     body_json = MrRequest(data.cache).execute(url)
 
@@ -19,7 +19,7 @@ def get_tournament_info(data, tournament_id: int):
     return Tournament(id=tournament_id, name=tournament_name, club=club, city=city)
 
 
-def get_tournament_events(data, tournament_id: int):
+def get_tournament_events(data: CommonData, tournament_id: int):
     url = f"/events.php?tournament_id={tournament_id}"
     body_json = MrRequest(data.cache).execute(url)
 
@@ -51,3 +51,25 @@ def get_tournament_events(data, tournament_id: int):
         event = Event(id, weight, is_final)
         events.append(event)
     return events
+
+
+def get_tournament_places(data: CommonData, tournament_id: int):
+    url = f"/tournament_places.php?tournament_id={tournament_id}"
+    body_json = MrRequest(data.cache).execute(url)
+
+    assert('count' in body_json)
+    assert('places' in body_json)
+    assert(body_json['count'] > 0)
+    places_json = body_json['places']
+    assert(body_json['count'] == len(places_json))
+
+    places = []
+    for item in places_json:
+        player_id = item['user_id']
+        place_num = item['place']
+        games_count = item['games_count']
+        place = {'player_id': player_id,
+                 'place': place_num,
+                 'games_count': games_count}
+        places.append(place)
+    return places

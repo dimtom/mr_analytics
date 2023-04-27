@@ -51,7 +51,8 @@ def analyze_tournament(data: CommonData, tournament_id: int):
         output.output_players(stage.players)
 
     # TODO: merge players of stages
-    # Technically, it is not good to have MANY sets of players as game points to Stage-Player with not final scores
+    # Technically, it is not good to have MANY sets of players
+    # as game points to Stage-Player with not final scores
     tournament_players = dict[int, Player]()
     for p in main_stage.players.values():
         # here we create COPY of Player
@@ -82,5 +83,15 @@ def analyze_tournament(data: CommonData, tournament_id: int):
 
     print("\n*** Final table of tournament:")
     output.output_players(tournament_players)
+
+    # use places API to get only places
+    places = mr_tournament.get_tournament_places(data, tournament_id)
+    sorted_places = sorted(places, key=lambda item: item['place'])
+
+    print("\n*** Tournament places")
+    for p in sorted_places:
+        player = tournament.players[p['player_id']]
+        games_count = p['games_count']
+        print(f"#{p['place']:<2d} {player.name[:20]:<20s} games:{games_count}")
 
     return tournament

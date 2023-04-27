@@ -4,7 +4,7 @@ import mr_games
 
 from request_cache import RequestCache
 
-import one_tournament
+from analyze_tournament import analyze_tournament
 
 
 def main():
@@ -45,7 +45,7 @@ def main():
 
     # Analyze GoldenGate-2023
     tournament_id = 116
-    one_tournament.analyze_tournament(data, tournament_id)
+    analyze_tournament(data, tournament_id)
 
     # TODO: save tournaments to disk
 
