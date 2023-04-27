@@ -41,7 +41,17 @@ def output_players(players):
     for player in sorted_players:
         total_score_str = f"{player.total_score: 6.2f}"
         main_score_str = f"{player.main_score: 6.2f}"
-        print(f"{player.name[:16]:16s} {total_score_str} {main_score_str} {player.legacy_score:6.2f} {player.bonus_score:6.2f} {player.penalty_score:6.2f} {player.ci_score:6.2f}")
+        auto_bonus_score = player.auto_score + player.bonus_score
+        print(f"{player.name[:16]:16s} {total_score_str} {main_score_str} {player.legacy_score:6.2f} {auto_bonus_score:6.2f} {player.penalty_score:6.2f} {player.ci_score:6.2f}")
+
+
+def output_tournament_places(tournament: Tournament, places: dict):
+    print("\n*** Tournament places")
+    sorted_places = sorted(places, key=lambda item: item['place'])
+    for p in sorted_places:
+        player = tournament.players[p['player_id']]
+        games_count = p['games_count']
+        print(f"#{p['place']:<2d} {player.name[:20]:<20s} games:{games_count}")
 
 
 def output_bonus_players(players: dict[int, Player]):

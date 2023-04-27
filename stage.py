@@ -30,7 +30,8 @@ def validate_stages(events: list[Event]) -> bool:
     if len(events) == 1:
         print(f"Only one stage found")
         event = events[0]
-        return event.is_main
+        # single stage MUST be main, not final
+        return not event.is_final_stage
 
     if len(events) == 2:
         print(f"Tournament with 2 stages")
@@ -58,7 +59,7 @@ def calculate_stage_distance(stage: Event):
 
     if len(distance_players) == 1:
         # great! this is a good stage
-        return distance_players.keys()[0]
+        return list(distance_players.keys())[0]
 
     print("### This is unusual stage: check the distances")
     print(distance_players)

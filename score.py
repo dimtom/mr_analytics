@@ -130,5 +130,5 @@ def calc_event_scores(event: Event, weight: float):
             player.ci_score += slot.ci_score
             player.legacy_score += slot.legacy_score
             player.auto_score += slot.auto_score
-            player.bonus_score += slot.auto_score + slot.bonus_score
+            player.bonus_score += slot.bonus_score
             player.penalty_score += slot.penalty_score

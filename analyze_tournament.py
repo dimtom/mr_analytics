@@ -27,10 +27,19 @@ def analyze_tournament(data: CommonData, tournament_id: int):
         return
 
     main_stage = find_main_stage(events)
+    if not main_stage:
+        print("### Main stage not found!")
+        return
+
     final_stage = find_final_stage(events)
+    if not final_stage:
+        print("Final stage not found: single-stage tournament")
 
     stages = [main_stage, final_stage]
     for stage in stages:
+        if stage is None:
+            continue
+
         print(f"\n*** Stage: {stage.id}")
         games_json = mr_games.load_tournament_games(
             data, tournament_id, stage.id)
@@ -60,26 +69,30 @@ def analyze_tournament(data: CommonData, tournament_id: int):
         # in main stage, in final stage, and in tournament itself...
         tournament_players[p.id] = copy(p)
 
-    for p in final_stage.players.values():
-        if p.id not in tournament_players:
-            # it CAN NOT happen, final player MUST be in main stage
-            # but...
-            print(
-                f"### Player in finals but does not play in main stage: {p.name}")
-            tournament_players[p.id] = copy(p)
-            continue
+    if final_stage:
+        # Merge players only if more than one stage
+        for p in final_stage.players.values():
+            if p.id not in tournament_players:
+                # it CAN NOT happen, final player MUST be in main stage
+                # but...
+                print(
+                    f"### Player in finals but does not play in main stage: {p.name}")
+                tournament_players[p.id] = copy(p)
+                continue
 
-        tournament_players[p.id].total_score += p.total_score
-        tournament_players[p.id].main_score += p.main_score
-        tournament_players[p.id].ci_score += p.ci_score
+            tournament_players[p.id].total_score += p.total_score
+            tournament_players[p.id].main_score += p.main_score
+            tournament_players[p.id].ci_score += p.ci_score
 
-        tournament_players[p.id].legacy_score += p.legacy_score
-        tournament_players[p.id].auto_score += p.auto_score
-        tournament_players[p.id].bonus_score += p.bonus_score
-        tournament_players[p.id].penalty_score += p.penalty_score
+            tournament_players[p.id].legacy_score += p.legacy_score
+            tournament_players[p.id].auto_score += p.auto_score
+            tournament_players[p.id].bonus_score += p.bonus_score
+            tournament_players[p.id].penalty_score += p.penalty_score
 
     tournament.players = tournament_players
-    tournament.games = main_stage.games + final_stage.games
+    tournament.games = main_stage.games
+    if final_stage:
+        tournament.games += final_stage.games
 
     print("\n*** Final table of tournament:")
     output.output_players(tournament_players)
@@ -89,12 +102,6 @@ def analyze_tournament(data: CommonData, tournament_id: int):
 
     # use places API to get only places
     places = mr_tournament.get_tournament_places(data, tournament_id)
-    sorted_places = sorted(places, key=lambda item: item['place'])
-
-    print("\n*** Tournament places")
-    for p in sorted_places:
-        player = tournament.players[p['player_id']]
-        games_count = p['games_count']
-        print(f"#{p['place']:<2d} {player.name[:20]:<20s} games:{games_count}")
+    output.output_tournament_places(tournament, places)
 
     return tournament
