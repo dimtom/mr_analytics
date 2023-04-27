@@ -84,6 +84,9 @@ def analyze_tournament(data: CommonData, tournament_id: int):
     print("\n*** Final table of tournament:")
     output.output_players(tournament_players)
 
+    print("\n*** Top5 players by total bonus score")
+    output.output_bonus_players(tournament_players)
+
     # use places API to get only places
     places = mr_tournament.get_tournament_places(data, tournament_id)
     sorted_places = sorted(places, key=lambda item: item['place'])

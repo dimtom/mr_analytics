@@ -42,3 +42,30 @@ def output_players(players):
         total_score_str = f"{player.total_score: 6.2f}"
         main_score_str = f"{player.main_score: 6.2f}"
         print(f"{player.name[:16]:16s} {total_score_str} {main_score_str} {player.legacy_score:6.2f} {player.bonus_score:6.2f} {player.penalty_score:6.2f} {player.ci_score:6.2f}")
+
+
+def output_bonus_players(players: dict[int, Player]):
+
+    # TODO: refactor - use separate method of Score:
+    # get_total_main_points
+    # get_total_bonus_points
+    # to avoid long + + +
+
+    # output player by bonus points (excluding Ci)
+    sort_by_bonus = (lambda player:
+                     player.legacy_score +
+                     player.auto_score +
+                     player.bonus_score +
+                     player.penalty_score)
+    sorted_bonus_players = sorted(
+        players.values(),
+        key=sort_by_bonus,
+        reverse=True)
+
+    top_five = 5
+    for pos, player in enumerate(sorted_bonus_players[:top_five]):
+        player_total_bonus = (player.legacy_score +
+                              player.auto_score +
+                              player.bonus_score +
+                              player.penalty_score)
+        print(f"{(pos+1):<2d}: {player.name} {player_total_bonus:>6.2f}")
