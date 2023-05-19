@@ -11,8 +11,8 @@ def load_tournament_games(data: CommonData, tournament_id: int, event_id: int):
     body_json = MrRequest(data.cache).execute(url)
 
     num_games = body_json['count']
-    print(f"Found games: {num_games}")
-    print(f"Games in the list: {len(body_json['games'])}")
+    # print(
+    #    f"Must match (Found games: {num_games:3d} games in the list: {len(body_json['games']):3d}")
 
     # ensure that we downloaded all the games in the first single page
     assert(num_games == len(body_json['games']))
@@ -58,10 +58,22 @@ def process_tournament_games(data: CommonData, tournament: Tournament, games_jso
             slot_auto = 0.3
             slot_bonus = 0.0
             if 'bonus' in item:
-                if item['bonus'] == "worstMove":
+                bonus_str = item['bonus']
+                if type(bonus_str) == list:
+                    print(f"### Unexpected bonus - list: {bonus_str}")
+                elif bonus_str == "worstMove":
                     slot_auto = 0.0
+                elif bonus_str == "bestMove" or bonus_str == "bestPlayer":
+                    # This is OLD structure, best move is calculated now...
+                    # print(f"### Unexpected bonus: {bonus_str}")
+                    slot_bonus = 0.0
                 else:
-                    slot_bonus = float(item['bonus'])
+                    try:
+                        slot_bonus = float(bonus_str)
+                    except ValueError:
+                        print(
+                            f"### Error to convert bonus to float: {bonus_str}")
+
             slot_role = item['role'] if 'role' in item else "civ"
 
             first_killed = False

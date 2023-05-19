@@ -35,7 +35,7 @@ def calcSlotPenaltyScore(self: Slot):
         elif self.eliminated == "teamKickOut":
             self.penalty_score = -0.7
         else:
-            print("### Unknown eliminated: {self.eliminated}")
+            print(f"### Unknown eliminated: {self.eliminated}")
 
 
 def calcSlotScores(self: Slot, weight: float):

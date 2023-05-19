@@ -45,8 +45,10 @@ def get_tournament_events(data: CommonData, tournament_id: int):
                 group_str = options_json['group']
                 if group_str == "final":
                     is_final = True
+                elif group_str == "main":
+                    is_final = False
                 else:
-                    print("### Unknown event group: {group_str}")
+                    print(f"### Unknown event group: {group_str}")
 
         event = Event(id, weight, is_final)
         events.append(event)

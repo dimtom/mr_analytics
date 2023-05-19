@@ -13,6 +13,54 @@ from stage import *
 import json
 
 
+def process_tournament(data: CommonData, tournament_id: int):
+    tournament = mr_tournament.get_tournament_info(data, tournament_id)
+    print(
+        f"\n*** Tournament: {tournament.name} Club: {tournament.club} City: {tournament.city}")
+
+    events = mr_tournament.get_tournament_events(data, tournament_id)
+    tournament.events = events
+
+    output_stages(events)
+    if not validate_stages(events):
+        print("### Tournament validation failed, exit")
+        return
+
+    main_stage = find_main_stage(events)
+    if not main_stage:
+        print("### Main stage not found!")
+        return
+
+    final_stage = find_final_stage(events)
+    if not final_stage:
+        print("Final stage not found: single-stage tournament")
+
+    stages = [main_stage, final_stage]
+    for stage in stages:
+        if stage is None:
+            continue
+
+        print(f"\n*** Stage: {stage.id}")
+        games_json = mr_games.load_tournament_games(
+            data, tournament_id, stage.id)
+        stage_games, stage_players = mr_games.process_tournament_games(
+            data, tournament, games_json)
+        stage.games = stage_games
+        stage.players = stage_players
+
+    tournament_players = dict[int, Player]()
+    for p in main_stage.players.values():
+        tournament_players[p.id] = copy(p)
+    tournament.players = tournament_players
+    print(f"Players: {len(tournament_players)}")
+
+    tournament.games = main_stage.games
+    if final_stage:
+        tournament.games += final_stage.games
+
+    return tournament
+
+
 def analyze_tournament(data: CommonData, tournament_id: int):
     tournament = mr_tournament.get_tournament_info(data, tournament_id)
     print(
@@ -54,10 +102,10 @@ def analyze_tournament(data: CommonData, tournament_id: int):
         weight = stage.weight
         score.calc_event_scores(stage, weight)
 
-        output.output_games(stage.games, stage.players)
+        # output.output_games(stage.games, stage.players)
 
         # print(stage_players)
-        output.output_players(stage.players)
+        # output.output_players(stage.players)
 
     # TODO: merge players of stages
     # Technically, it is not good to have MANY sets of players
@@ -94,14 +142,14 @@ def analyze_tournament(data: CommonData, tournament_id: int):
     if final_stage:
         tournament.games += final_stage.games
 
-    print("\n*** Final table of tournament:")
-    output.output_players(tournament_players)
+    # print("\n*** Final table of tournament:")
+    # output.output_players(tournament_players)
 
-    print("\n*** Top5 players by total bonus score")
-    output.output_bonus_players(tournament_players)
+    # print("\n*** Top5 players by total bonus score")
+    # output.output_bonus_players(tournament_players)
 
     # use places API to get only places
-    places = mr_tournament.get_tournament_places(data, tournament_id)
-    output.output_tournament_places(tournament, places)
+    # places = mr_tournament.get_tournament_places(data, tournament_id)
+    # output.output_tournament_places(tournament, places)
 
     return tournament

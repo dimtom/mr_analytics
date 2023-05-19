@@ -20,10 +20,10 @@ class MrRequest:
         pass
 
     def execute(self, url: str) -> str:
-
         full_url = self.mr_url_api_get + url
         response = self.cache.get(full_url)
         if response is None:
+            print(f"Request not found in cache: {full_url}")
             req = Request(url=full_url, headers=self.mr_headers)
             with urlopen(req) as response:
                 body = response.read()
