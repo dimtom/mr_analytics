@@ -196,6 +196,81 @@ def report_moderators(data, tournaments):
             f"{(pos+1):2d} {id:4d} {moderator_name:16s} {moderator_games[id]:3d}")
 
 
+def report_games_result(data, tournaments):
+    game_results = {}
+    game_count = 0
+    for id, t in tournaments.items():
+        for game in t.games:
+            game_count += 1
+            if game.result not in game_results:
+                game_results[game.result] = 0
+            game_results[game.result] += 1
+
+    print("\n*** Report - game results")
+    print(f"Total number of games: {game_count}")
+
+    for res in game_results:
+        count = game_results[res]
+        percentage = count / game_count
+        print(
+            f"{res:8s} {count:3d} {100.0 * percentage:.2f}%")
+
+
+def report_player_win_role(data, tournaments):
+    player_win_sheriff = defaultdict(int)
+    player_games_sheriff = defaultdict(int)
+
+    player_win_don = defaultdict(int)
+    player_games_don = defaultdict(int)
+
+    game_count = 0
+    for id, t in tournaments.items():
+        for game in t.games:
+            game_count += 1
+            for slot in game.slots:
+                if slot.role == "sheriff":
+                    player_id = slot.player_id
+                    player_games_sheriff[player_id] += 1
+                    if game.result == "red":
+                        player_win_sheriff[player_id] += 1
+                elif slot.role == "don":
+                    player_id = slot.player_id
+                    player_games_don[player_id] += 1
+                    if game.result == "black":
+                        player_win_don[player_id] += 1
+
+    print("\n*** Sheriff")
+    sorted_sheriff = sorted(player_games_sheriff,
+                            key=lambda id: player_win_sheriff[id], reverse=True)
+    for id in sorted_sheriff:
+        player = data.players[id] if id in data.players else None
+        player_name = player.name if player else "Unknown"
+        win = player_win_sheriff[id]
+        total = player_games_sheriff[id]
+
+        # drop small results
+        if total <= 3 or win <= 1:
+            continue
+        rate = win/total
+        print(f"{player_name:16s} {(100.0 * rate):8.2f}% {win:2d} / {total:2d}")
+
+    print("\n*** Don")
+    sorted_don = sorted(player_games_don,
+                        key=lambda id: player_win_don[id], reverse=True)
+    for id in sorted_don:
+        player = data.players[id] if id in data.players else None
+        player_name = player.name if player else "Unknown"
+        win = player_win_don[id]
+        total = player_games_don[id]
+
+        # drop small results
+        if total <= 3 or win <= 1:
+            continue
+
+        rate = win/total
+        print(f"{player_name:16s} {(100.0 * rate):8.2f}% {win:2d} / {total:2d}")
+
+
 def print_clubs(data):
     print("\n*** All clubs")
     for id, club in data.clubs.items():
@@ -228,7 +303,9 @@ def main():
     # report_player_games(data, processed_tournaments)
 
     report_moderators(data, processed_tournaments)
+    report_games_result(data, processed_tournaments)
 
+    report_player_win_role(data, processed_tournaments)
     cache.save()
     pass
 
