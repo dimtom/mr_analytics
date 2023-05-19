@@ -16,7 +16,8 @@ import json
 def process_tournament(data: CommonData, tournament_id: int):
     tournament = mr_tournament.get_tournament_info(data, tournament_id)
     print(
-        f"\n*** Tournament: {tournament.name} Club: {tournament.club} City: {tournament.city}")
+        f"\n*** Tournament: {tournament.id} {tournament.name}")
+    print(f"Club: {tournament.club} City: {tournament.city}")
 
     events = mr_tournament.get_tournament_events(data, tournament_id)
     tournament.events = events
@@ -40,13 +41,13 @@ def process_tournament(data: CommonData, tournament_id: int):
         if stage is None:
             continue
 
-        print(f"\n*** Stage: {stage.id}")
         games_json = mr_games.load_tournament_games(
             data, tournament_id, stage.id)
         stage_games, stage_players = mr_games.process_tournament_games(
             data, tournament, games_json)
         stage.games = stage_games
         stage.players = stage_players
+        print(f"Stage: {stage.id} Games: {len(stage.games)}")
 
     tournament_players = dict[int, Player]()
     for p in main_stage.players.values():
@@ -57,6 +58,7 @@ def process_tournament(data: CommonData, tournament_id: int):
     tournament.games = main_stage.games
     if final_stage:
         tournament.games += final_stage.games
+    print(f"Total number of games: {len(tournament.games)}")
 
     return tournament
 
