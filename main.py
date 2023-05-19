@@ -57,6 +57,15 @@ def get_players(data, tournaments):
     player_tournaments = {}
     for id, t in tournaments.items():
         places = mr_tournament.get_tournament_places(data, id)
+
+        # for debug only
+        print(f"\nTournament table: {t.name}")
+        for pos, p in enumerate(places):
+            player_id = p['player_id']
+            player = data.players[player_id] if player_id in data.players else None
+            player_name = player.name if player else "Unknown"
+            print(f"{(pos+1)}: {player_name:20s}")
+
         for p in places:
             player_id = p['player_id']
             if player_id not in player_tournaments:
