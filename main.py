@@ -91,6 +91,7 @@ def process_tournaments(data, tournaments):
 
 
 def get_players_from_tournaments(data, tournaments):
+    print(f"\n*** Populate player names from tournaments...")
     # put all players into common data
     # NB: we don't need scores, just
     for id, tournament in tournaments.items():
@@ -139,6 +140,62 @@ def report_top_players(data, tournaments):
             f"{(pos+1):3d} {player_name:16s} {len(player_tournaments[id]):3d}")
 
 
+def report_player_games(data, tournaments):
+    player_games = {}
+    game_count = 0
+    for id, t in tournaments.items():
+        games = t.games
+
+        for game in games:
+            game_count += 1
+            slots = game.slots
+            for slot in slots:
+                player_id = slot.player_id
+                if player_id not in player_games:
+                    player_games[player_id] = 0
+                player_games[player_id] += 1
+
+    print("\n*** Report - player and games count")
+    print(f"Total number of tournaments: {len(tournaments)}")
+    print(f"Total number of games: {game_count}")
+
+    print(
+        f"\n*** Players that played the most number of games: {len(player_games)}")
+    sorted_players = sorted(
+        player_games, key=lambda id: player_games[id], reverse=True)
+    for pos, id in enumerate(sorted_players):
+        player = data.players[id] if id in data.players else None
+        player_name = player.name if player else "Unknown"
+        print(
+            f"{(pos+1):3d} {player_name:16s} {player_games[id]:3d}")
+
+
+def report_moderators(data, tournaments):
+    moderator_games = {}
+    game_count = 0
+    for id, t in tournaments.items():
+        for game in t.games:
+            game_count += 1
+            moderator_id = int(game.moderator_id)
+            if moderator_id not in moderator_games:
+                moderator_games[moderator_id] = 0
+            moderator_games[moderator_id] += 1
+
+    print("\n*** Report - modetarots and games count")
+    print(f"Total number of tournaments: {len(tournaments)}")
+    print(f"Total number of games: {game_count}")
+
+    print(
+        f"\n*** Moderators that played the most number of games: {len(moderator_games)}")
+    sorted_moderators = sorted(
+        moderator_games.keys(), key=lambda id: moderator_games[id], reverse=True)
+    for pos, id in enumerate(sorted_moderators):
+        moderator = data.players[id] if id in data.players else None
+        moderator_name = moderator.name if moderator else "Unknown"
+        print(
+            f"{(pos+1):2d} {id:4d} {moderator_name:16s} {moderator_games[id]:3d}")
+
+
 def print_clubs(data):
     print("\n*** All clubs")
     for id, club in data.clubs.items():
@@ -166,8 +223,11 @@ def main():
     get_players_from_tournaments(data, processed_tournaments)
 
     # get all players
-    report_tournament_places(data, processed_tournaments)
-    report_top_players(data, processed_tournaments)
+    # report_tournament_places(data, processed_tournaments)
+    # report_top_players(data, processed_tournaments)
+    # report_player_games(data, processed_tournaments)
+
+    report_moderators(data, processed_tournaments)
 
     cache.save()
     pass
