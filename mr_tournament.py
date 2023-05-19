@@ -50,6 +50,10 @@ def get_tournament_events(data: CommonData, tournament_id: int):
                 else:
                     print(f"### Unknown event group: {group_str}")
 
+            # workaround for some stages without GROUP
+            if weight > 1.0:
+                is_final = True
+
         event = Event(id, weight, is_final)
         events.append(event)
     return events

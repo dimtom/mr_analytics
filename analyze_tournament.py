@@ -33,8 +33,10 @@ def process_tournament(data: CommonData, tournament_id: int):
         return
 
     final_stage = find_final_stage(events)
+    '''
     if not final_stage:
         print("Final stage not found: single-stage tournament")
+    '''
 
     stages = [main_stage, final_stage]
     for stage in stages:
@@ -53,7 +55,7 @@ def process_tournament(data: CommonData, tournament_id: int):
     for p in main_stage.players.values():
         tournament_players[p.id] = copy(p)
     tournament.players = tournament_players
-    print(f"Players: {len(tournament_players)}")
+    # print(f"Players: {len(tournament_players)}")
 
     tournament.games = main_stage.games
     if final_stage:

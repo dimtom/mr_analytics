@@ -28,13 +28,13 @@ def validate_stages(events: list[Event]) -> bool:
         return False
 
     if len(events) == 1:
-        print(f"Only one stage found")
+        # print(f"Only one stage found")
         event = events[0]
         # single stage MUST be main, not final
         return not event.is_final_stage
 
     if len(events) == 2:
-        print(f"Tournament with 2 stages")
+        # print(f"Tournament with 2 stages")
         main_stage = find_main_stage(events)
         final_stage = find_final_stage(events)
         return main_stage and final_stage
