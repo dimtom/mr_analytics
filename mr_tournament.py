@@ -61,6 +61,11 @@ def get_tournament_places(data: CommonData, tournament_id: int):
 
     assert('count' in body_json)
     assert('places' in body_json)
+    if body_json['count'] == 0 or not body_json['places']:
+        # This tournament does not have places
+        # bad tournament, not finished tournament
+        return None
+
     assert(body_json['count'] > 0)
     places_json = body_json['places']
     assert(body_json['count'] == len(places_json))
