@@ -18,6 +18,8 @@ def main():
     tournaments = analyze_league(data)
     # TODO: use tournaments for processing
 
+    print(tournaments)
+
     '''
     # Load all games of tournaments
     # NB: we need to use event_id, or update load_tournament_games
@@ -32,8 +34,8 @@ def main():
     # analyze single tournament
 
     # tournament_id = 115  # Friends cup 2023
-    tournament_id = 116  # Golgen Gate 2023
-    analyze_tournament(data, tournament_id)
+    # tournament_id = 116  # Golgen Gate 2023
+    # analyze_tournament(data, tournament_id)
 
     cache.save()
     pass
