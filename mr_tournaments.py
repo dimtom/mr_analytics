@@ -11,11 +11,12 @@ def load_tournaments(data: CommonData, date_from, date_to, verbose=False):
     '''
     print(f"Loading tournaments by date: {date_from} - {date_to}")
 
-    # url = f"{url_api_get}/tournaments.php?{league_aml}&started_after={date_from}&ended_before={date_to}&lod=1"
-    url = f"/tournaments.php?&started_after={date_from}&ended_before={date_to}&lod=1"
+    # url = f"{url_api_get}/tournaments.php?{league_aml}&started_after={date_from}&ended_before={date_to}&page_size=1000&lod=1"
+    url = f"/tournaments.php?&started_after={date_from}&ended_before={date_to}&lod=1&page_size=1000"
     body_json = MrRequest(data.cache).execute(url)
 
     print(f"Found tournaments: {body_json['count']}")
+    print(f"Tournaments on page: {len(body_json['tournaments'])}")
     sorted_tournaments = sorted(
         body_json['tournaments'], key=lambda item: item['end'])
     for tournament in sorted_tournaments:
