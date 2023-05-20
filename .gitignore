@@ -1,6 +1,9 @@
 # cache file for requests - do not check in
 .request_cache
 
+# visual studio settings
+settings.json
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
