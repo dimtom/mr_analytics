@@ -15,7 +15,7 @@ def load_tournament_games(data: CommonData, tournament_id: int, event_id: int):
     #    f"Must match (Found games: {num_games:3d} games in the list: {len(body_json['games']):3d}")
 
     # ensure that we downloaded all the games in the first single page
-    assert(num_games == len(body_json['games']))
+    assert (num_games == len(body_json['games']))
     return body_json['games']
 
 
@@ -33,7 +33,7 @@ def process_tournament_games(data: CommonData, tournament: Tournament, games_jso
             continue
 
         game_id = game_json['id']
-        moderator_id = game_json['moderator']['id']
+        moderator_id = int(game_json['moderator']['id'])
         game_result = game_json['winner']
         players_json = game_json['players']
 
