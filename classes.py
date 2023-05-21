@@ -102,18 +102,18 @@ class Game:
 
     def check_slots_valid(self, slots: list[Slot]):
         for s in slots:
-            assert(s.game == self)
+            assert (s.game == self)
 
         role_count = defaultdict(int)
         for s in slots:
             role_count[s.role] += 1
-        assert(role_count['civ'] == 6)
-        assert(role_count['sheriff'] == 1)
-        assert(role_count['maf'] == 2)
-        assert(role_count['don'] == 1)
+        assert (role_count['civ'] == 6)
+        assert (role_count['sheriff'] == 1)
+        assert (role_count['maf'] == 2)
+        assert (role_count['don'] == 1)
 
     def set_slots(self, slots: list[Slot]):
-        assert(len(slots) == 10)
+        assert (len(slots) == 10)
 
         self.check_slots_valid(slots)
         self.slots = slots
@@ -150,7 +150,7 @@ class Slot:
     def __init__(self, game: Game, position: int, player_id: int, player_name: str):
         self.game = game
         self.position = position
-        assert(self.position >= 1 and self.position <= 10)
+        assert (self.position >= 1 and self.position <= 10)
 
         self.player_id = player_id
         self.player_name = player_name
@@ -177,6 +177,12 @@ class Slot:
             # for debug
             # print(f"### Unknown role: {self.role}")
             return None
+
+    def role_red(self):
+        return self.role == "civ" or self.role == "sheriff"
+
+    def role_black(self):
+        return self.role == "maf" or self.role == "don"
 
 
 class Player:

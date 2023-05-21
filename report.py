@@ -9,7 +9,6 @@ import mr_games
 from request_cache import RequestCache
 
 from analyze_league import analyze_league
-import analyze_tournament
 
 
 def report_tournament_places(data: CommonData, tournaments):
